@@ -1,5 +1,3 @@
-using System.Drawing;
-
 namespace IT_4_term_Lab_6;
 
 public class Location
@@ -10,10 +8,11 @@ public class Location
     public double Longitude;
     public string Title; 
 
-    public Location(double longitude, double latitude)
+    public Location(double longitude, double latitude, string title = "")
     {
         Longitude = longitude;
         Latitude = latitude;
+        Title = title;
     }
     
 
@@ -25,6 +24,11 @@ public class Location
             Math.Cos(Latitude * Math.PI / 180) * Math.Pow(Math.Sin(deltaLong / 2), 2);
         var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
         return 6371000 * c;
+    }
+
+    public override string ToString()
+    {
+        return Title;
     }
 }
     
