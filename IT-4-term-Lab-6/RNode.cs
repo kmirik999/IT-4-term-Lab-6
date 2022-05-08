@@ -26,8 +26,6 @@ public class RNode
         {
             LatitudeMax = LatitudeMin = e.Latitude;
             LongitudeMax = LongitudeMin = e.Longitude;
-
-            list.Add(e);
         }
         else
         {
@@ -90,11 +88,15 @@ public class RNode
             list.Sort(CompareByCoordinateX);
         else list.Sort(CompareByCoordinateY);
 
-        FirstChild.Add(list[0]);
-        SecondChild.Add(list[Size - 1]);
-
-        list.RemoveAt(Size - 1);
-        list.RemoveAt(0);
+        while (list.Count > 0 )
+        {
+            FirstChild.Add(list[0]);
+            list.RemoveAt(0);
+            
+            SecondChild.Add(list[list.Count - 1]);
+            list.RemoveAt(list.Count - 1);
+        }
+        
     }
     public static bool OptimalInclude(RNode first, RNode second, Location place)
     {
@@ -126,7 +128,7 @@ public class RNode
 
     }
 
-    public void PrintPointsInRadius(double lonng, double lat, double distance)
+    public List<Location> GetPointsInRadius(double lonng, double lat, double distance)
     {
         var radius = 6371000;
         var delta = distance / radius;
@@ -136,34 +138,41 @@ public class RNode
         var longitudeMin = GetBearingLonng(lonngRad, latRad, delta, 1.5 * Math.PI)* 180/Math.PI;
         var latitudeMax = GetBearindLat(latRad, delta, Math.PI * 0)* 180/Math.PI;
         var latitudeMin = GetBearindLat(latRad, delta, Math.PI * 1)* 180/Math.PI;
-        PrintPointsInRadius( lonng,lat,distance,longitudeMax,longitudeMin,latitudeMax,latitudeMin);
-        
+        return GetPointsInRadius( lonng,lat,distance,longitudeMax,longitudeMin,latitudeMax,latitudeMin);
     }
 
-    public void PrintPointsInRadius(double lonng, double lat, double distance, double longitudeMax, double longitudeMin,
+    public List<Location> GetPointsInRadius(double lonng, double lat, double distance, double longitudeMax, double longitudeMin,
         double latitudeMax, double latitudeMin)
     {
+        
         if (!IsOverlapping(longitudeMax, longitudeMin, latitudeMax, latitudeMin))
         {
-            return;
+            return new List<Location>();
+        }
+        
+        if (IsParent)
+        {
+            var l = FirstChild.GetPointsInRadius(lonng, lat, distance, longitudeMax, longitudeMin, latitudeMax,
+                latitudeMin);
+            l.AddRange(SecondChild.GetPointsInRadius(lonng,lat,distance,longitudeMax,longitudeMin,latitudeMax,latitudeMin));
+            return l;
         }
 
+        var l2 = new List<Location>();
         for (int i = 0; i < list.Count; i++)
         {
             var distanceToPoint = list[i].GetDistanceTo(lonng, lat);
 
             if (distanceToPoint < distance)
             {
-                Console.WriteLine(list[i].Title + "," + distanceToPoint + "m");
+               
+                l2.Add(list[i]);
+                
             }
+            // когда точка не парент, GetPointsInRadius должен возвращать List<Location>
             
         }
-
-        if (IsParent)
-        {
-            FirstChild.PrintPointsInRadius(lonng,lat,distance,longitudeMax,longitudeMin,latitudeMax,latitudeMin);
-            SecondChild.PrintPointsInRadius(lonng,lat,distance,longitudeMax,longitudeMin,latitudeMax,latitudeMin);
-        }
+        return l2;
     }
 
     public bool IsOverlapping(double longitudeMax,double longitudeMin,double latitudeMax,double latitudeMin)

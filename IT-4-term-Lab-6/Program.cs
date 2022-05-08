@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -77,7 +78,13 @@ sw.Stop();
 Console.WriteLine($"Elapsed time: {sw.Elapsed}");
 
 
-sw.Restart();
-Rtree.PrintPointsInRadius(lonng,lat, size); 
+sw.Restart(); 
+
+foreach (var l in Rtree.GetPointsInRadius(lonng,lat, size) )
+{
+    Console.WriteLine(l);
+}
+
+
 sw.Stop();
 Console.WriteLine($"Elapsed time: {sw.Elapsed}");
