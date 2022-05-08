@@ -169,8 +169,6 @@ public class RNode
                 l2.Add(list[i]);
                 
             }
-            // когда точка не парент, GetPointsInRadius должен возвращать List<Location>
-            
         }
         return l2;
     }
